@@ -1,4 +1,4 @@
-# bimap
+# multi_bimap
 
 Many-to-many bidirectional map in Rust.
 
@@ -6,7 +6,7 @@ Many-to-many bidirectional map in Rust.
 
 ### Adding dependency
 
-First, add `maplike` as a dependency to your `Cargo.toml`:
+First, add `multi_bimap` as a dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
