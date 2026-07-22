@@ -10,5 +10,5 @@ First, add `multi_bimap` as a dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-multi_bimap = "0.1.1"
+multi_bimap = "0.1.2"
 ```
