@@ -1,13 +1,18 @@
 [package]
 name = "multi_bimap"
 version = "0.1.0"
-edition = "2024"
 authors = ["Mikolaj Wielgus <wielgusmikolaj@gmail.com>"]
 description = "Many-to-many bidirectional map in Rust."
+repository = "https://github.com/mikwielgus/multi_bimap"
 documentation = "https://docs.rs/multi_bimap"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-keywords = ["bidirectional", "bijection", "two-way", "map", "container"]
+keywords = ["bidirectional", "bijection", "container", "two-way", "map"]
+categories = ["algorithms", "data-structures", "no-std"]
+edition = "2024"
+
+[badges]
+maintenance = { status = "actively-developed" }
 
 [dependencies]
 maplike = "0.13.0"
