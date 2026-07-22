@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 multi_bimap contributors
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+shared-version = true
+pre-release-commit-message = "Release version {{version}}"
+
 pre-release-replacements = [
   { file = "README.md", search = 'multi_bimap = "[^"]+"', replace = '{{crate_name}} = "{{version}}"' },
 ]
