@@ -20,14 +20,14 @@ multi_bimap = "0.1.2"
 
 ### Example
 
-A `Bimap` keeps two antiparallel maps in sync. Each side may map a key to
+A `MultiBimap` keeps two antiparallel maps in sync. Each side may map a key to
 multiple values. You can look up associations in either direction.
 
 ```rust
-use multi_bimap::Bimap;
+use multi_bimap::MultiBimap;
 use std::collections::{HashMap, HashSet};
 
-let mut m: Bimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = Bimap::new();
+let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
 
 m.insert("a", 1);
 m.insert("a", 2);

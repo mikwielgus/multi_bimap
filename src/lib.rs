@@ -12,12 +12,12 @@ use maplike::containers::Container;
 use maplike::ops::{Clear, Get, Insert, Modify, Put, Remove, WithOne};
 
 /// Many-to-many bidirectional map made of two antiparallel maps.
-pub struct Bimap<L2R, R2L> {
+pub struct MultiBimap<L2R, R2L> {
     left_to_right: L2R,
     right_to_left: R2L,
 }
 
-impl<L2R, R2L> Bimap<L2R, R2L> {
+impl<L2R, R2L> MultiBimap<L2R, R2L> {
     /// Returns a reference to the left-to-right map.
     pub fn left_to_right(&self) -> &L2R {
         &self.left_to_right
@@ -29,17 +29,17 @@ impl<L2R, R2L> Bimap<L2R, R2L> {
     }
 }
 
-impl<L2R: Default, R2L: Default> Bimap<L2R, R2L> {
-    /// Creates a new, empty `Bimap`.
+impl<L2R: Default, R2L: Default> MultiBimap<L2R, R2L> {
+    /// Creates a new, empty `MultiBimap`.
     pub fn new() -> Self {
-        Bimap {
+        MultiBimap {
             left_to_right: Default::default(),
             right_to_left: Default::default(),
         }
     }
 }
 
-impl<L2R, R2L> Container for Bimap<L2R, R2L>
+impl<L2R, R2L> Container for MultiBimap<L2R, R2L>
 where
     L2R: Container,
     R2L: Container,
@@ -48,7 +48,7 @@ where
     type Value = <R2L as Container>::Key;
 }
 
-impl<L2R, R2L> Insert<<L2R as Container>::Key> for Bimap<L2R, R2L>
+impl<L2R, R2L> Insert<<L2R as Container>::Key> for MultiBimap<L2R, R2L>
 where
     L2R: Container,
     R2L: Container,
@@ -73,11 +73,11 @@ where
         key: <L2R as Container>::Key,
         value: <R2L as Container>::Key,
     ) -> Self::Output {
-        Bimap::insert(self, key, value)
+        MultiBimap::insert(self, key, value)
     }
 }
 
-impl<L2R, R2L> Bimap<L2R, R2L>
+impl<L2R, R2L> MultiBimap<L2R, R2L>
 where
     L2R: Container,
     R2L: Container,
@@ -100,10 +100,10 @@ where
     /// # Examples
     ///
     /// ```
-    /// use multi_bimap::Bimap;
+    /// use multi_bimap::MultiBimap;
     /// use std::collections::{HashMap, HashSet};
     ///
-    /// let mut m: Bimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = Bimap::new();
+    /// let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
     ///
     /// assert_eq!(m.insert("a", 1), (None, None));
     /// m.insert("a", 2);
@@ -157,7 +157,7 @@ where
     }
 }
 
-impl<L2R, R2L> Remove<(<L2R as Container>::Key, <R2L as Container>::Key)> for Bimap<L2R, R2L>
+impl<L2R, R2L> Remove<(<L2R as Container>::Key, <R2L as Container>::Key)> for MultiBimap<L2R, R2L>
 where
     L2R: Container,
     R2L: Container,
@@ -178,11 +178,11 @@ where
         &mut self,
         key: &(<L2R as Container>::Key, <R2L as Container>::Key),
     ) -> Option<(<L2R as Container>::Key, <R2L as Container>::Key)> {
-        Bimap::remove(self, &key.0, &key.1)
+        MultiBimap::remove(self, &key.0, &key.1)
     }
 }
 
-impl<L2R, R2L> Bimap<L2R, R2L>
+impl<L2R, R2L> MultiBimap<L2R, R2L>
 where
     L2R: Container,
     R2L: Container,
@@ -206,10 +206,10 @@ where
     /// # Examples
     ///
     /// ```
-    /// use multi_bimap::Bimap;
+    /// use multi_bimap::MultiBimap;
     /// use std::collections::{HashMap, HashSet};
     ///
-    /// let mut m: Bimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = Bimap::new();
+    /// let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
     ///
     /// m.insert("a", 1);
     /// m.insert("a", 2);
@@ -255,17 +255,17 @@ where
     }
 }
 
-impl<L2R, R2L> Clear for Bimap<L2R, R2L>
+impl<L2R, R2L> Clear for MultiBimap<L2R, R2L>
 where
     L2R: Clear,
     R2L: Clear,
 {
     fn clear(&mut self) {
-        Bimap::clear(self)
+        MultiBimap::clear(self)
     }
 }
 
-impl<L2R, R2L> Bimap<L2R, R2L>
+impl<L2R, R2L> MultiBimap<L2R, R2L>
 where
     L2R: Clear,
     R2L: Clear,
@@ -277,10 +277,10 @@ where
     /// # Examples
     ///
     /// ```
-    /// use multi_bimap::Bimap;
+    /// use multi_bimap::MultiBimap;
     /// use std::collections::{HashMap, HashSet};
     ///
-    /// let mut m: Bimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = Bimap::new();
+    /// let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
     ///
     /// m.insert("a", 1);
     /// m.insert("b", 2);
@@ -308,7 +308,7 @@ mod tests {
 
     #[test]
     fn insert_allows_many_on_both_sides() {
-        let mut m: Bimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = Bimap::new();
+        let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
 
         m.insert("a", 1);
         m.insert("a", 2);
@@ -334,7 +334,7 @@ mod tests {
 
     #[test]
     fn remove_pair_and_drop_empty_keys() {
-        let mut m: Bimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = Bimap::new();
+        let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
 
         m.insert("a", 1);
         m.insert("a", 2);
@@ -359,7 +359,7 @@ mod tests {
 
     #[test]
     fn clear_empties_both_sides() {
-        let mut m: Bimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = Bimap::new();
+        let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
 
         m.insert("a", 1);
         m.insert("b", 2);
