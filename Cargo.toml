@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 multi_bimap contributors
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
 [package]
 name = "multi_bimap"
 version = "0.1.2"

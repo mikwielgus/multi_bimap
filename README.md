@@ -5,9 +5,9 @@ SPDX-License-Identifier: MIT OR Apache-2.0
 -->
 
 [![Repository](https://img.shields.io/badge/repository-GitHub-0FBF3E)](https://github.com/mikwielgus/multi_bimap)
-[![Docs](https://docs.rs/undoredo/badge.svg)](https://docs.rs/undoredo/)
-[![Crates.io](https://img.shields.io/crates/v/undoredo.svg)](https://crates.io/crates/undoredo)
-[![MIT OR Apache 2.0](https://img.shields.io/crates/l/undoredo.svg)](#licence)
+[![Docs](https://docs.rs/multi_bimap/badge.svg)](https://docs.rs/multi_bimap/)
+[![Crates.io](https://img.shields.io/crates/v/multi_bimap.svg)](https://crates.io/crates/multi_bimap)
+[![MIT OR Apache 2.0](https://img.shields.io/crates/l/multi_bimap.svg)](#licence)
 
 # multi_bimap
 
