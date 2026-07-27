@@ -226,12 +226,10 @@ where
     R2L: Get<<R2L as Container>::Key>
         + Modify<<R2L as Container>::Key>
         + Remove<<R2L as Container>::Key>,
-    <L2R as Container>::Value: Remove<<R2L as Container>::Key, Output = Option<()>>
-        + Default
-        + PartialEq,
-    <R2L as Container>::Value: Remove<<L2R as Container>::Key, Output = Option<()>>
-        + Default
-        + PartialEq,
+    <L2R as Container>::Value:
+        Remove<<R2L as Container>::Key, Output = Option<()>> + Default + PartialEq,
+    <R2L as Container>::Value:
+        Remove<<L2R as Container>::Key, Output = Option<()>> + Default + PartialEq,
     <L2R as Container>::Key: Clone,
     <R2L as Container>::Key: Clone,
 {
@@ -255,12 +253,10 @@ where
     R2L: Get<<R2L as Container>::Key>
         + Modify<<R2L as Container>::Key>
         + Remove<<R2L as Container>::Key>,
-    <L2R as Container>::Value: Remove<<R2L as Container>::Key, Output = Option<()>>
-        + Default
-        + PartialEq,
-    <R2L as Container>::Value: Remove<<L2R as Container>::Key, Output = Option<()>>
-        + Default
-        + PartialEq,
+    <L2R as Container>::Value:
+        Remove<<R2L as Container>::Key, Output = Option<()>> + Default + PartialEq,
+    <R2L as Container>::Value:
+        Remove<<L2R as Container>::Key, Output = Option<()>> + Default + PartialEq,
     <L2R as Container>::Key: Clone,
     <R2L as Container>::Key: Clone,
 {

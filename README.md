@@ -16,10 +16,20 @@ Many-to-many bidirectional map in Rust.
 This crate provides a `MultiBimap` struct, a bidirectional multimap that is
 implemented as two antiparallel multimaps that are kept in sync.
 
-The bidirectional multimap relation is known under many other names:
-*bi-multimap*, *multi-bimap*, or sometimes even just *bimap*; in set theory,
-it's simply called a *relation*; in graph theory, it's the same as a *bipartite
-graph*.
+You can arbitrarily choose what should be the types of the constituent
+multimaps: for example, `HashMap<&str, HashSet<&str>>`, `BTreeMap<i64,
+Vec<&str>>`, `indexmap::IndexMap<&str, Box<(i64, i64)>` are all valid options.
+Even better, these multimaps can have mixed types (e.g. `HashMap` of `HashSet`s
+pointing rightwards, `BTreeMap` of `Box`es pointing leftwards), so you can also
+have one-to-many or many-to-one bimaps as well (one-to-one bimap is obviously
+also an option). This is possible because `MultiBimap` uses traits from
+[`maplike`](https://github.com/mikwielgus/maplike), a Rust crate which allows to
+have a generic interface over a large number of containers.
+
+This bidirectional multimap relation that `MultiBimap` models is also known
+under many other names: *bi-multimap*, *multi-bimap*, or sometimes even just
+*bimap*; in set theory, it's simply called a *relation*; in graph theory, it's
+the same as a *bipartite graph*.
 
 ## Usage
 
@@ -32,7 +42,9 @@ First, add `multi_bimap` as a dependency to your `Cargo.toml`:
 multi_bimap = "0.2.0"
 ```
 
-### Example
+### Examples
+
+#### Many-to-many bidirectional map
 
 In academic publishing, the relation between authors and academic papers is
 many-to-many; it is a bipartite graph: each author may have many papers, and
@@ -82,18 +94,18 @@ assert_eq!(authorship.get_by_left("Charles Babbage"), None);
 
 ## Documentation
 
-See the [documentation](https://docs.rs/undoredo/latest/undoredo) for more information
-on `undoredo`'s usage.
+See the [documentation](https://docs.rs/multi_bimap/latest/multi_bimap) for more information
+on `multi_bimap`'s usage.
 
 ## Packaging
 
-`undoredo` is published as a [crate](https://crates.io/crates/undoredo) on the
+`multi_bimap` is published as a [crate](https://crates.io/crates/multi_bimap) on the
 [Crates.io](https://crates.io/) registry.
 
 ## Contributing
 
 We welcome issues, pull requests and any other contributions from anyone to our
-[repository](https://github.com/mikwielgus/undoredo) on GitHub.
+[repository](https://github.com/mikwielgus/multi_bimap) on GitHub.
 
 ## Licence
 
@@ -102,7 +114,7 @@ We welcome issues, pull requests and any other contributions from anyone to our
 `multi_bimap` is dual-licensed as under
 
 - [MIT license](./LICENSES/MIT.txt), or
-- [Apache License, Version 2.0](./LICENSES/Apache-2.0.txt).
+- [Apache License, Version 2.0](./LICENSES/Apache-2.0.txt),
 
 at your option.
 
