@@ -8,6 +8,8 @@
 #![forbid(unsafe_code)]
 //#![no_std]
 
+use core::borrow::Borrow;
+
 use maplike::containers::Container;
 use maplike::ops::{Clear, Get, Insert, Modify, Put, Remove, WithOne};
 
@@ -36,6 +38,62 @@ impl<L2R: Default, R2L: Default> MultiBimap<L2R, R2L> {
             left_to_right: Default::default(),
             right_to_left: Default::default(),
         }
+    }
+}
+
+impl<L2R, R2L> MultiBimap<L2R, R2L>
+where
+    L2R: Container,
+    R2L: Container,
+{
+    /// Returns the container holding right-side values associated with given
+    /// left-side key.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use multi_bimap::MultiBimap;
+    /// use std::collections::{HashMap, HashSet};
+    ///
+    /// let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
+    ///
+    /// m.insert("a", 1);
+    /// m.insert("a", 2);
+    ///
+    /// assert_eq!(m.get_by_left("a"), Some(&HashSet::from([1, 2])));
+    /// assert_eq!(m.get_by_left("missing"), None);
+    /// ```
+    pub fn get_by_left<Q: ?Sized>(&self, left: &Q) -> Option<&<L2R as Container>::Value>
+    where
+        L2R: Get<<L2R as Container>::Key, Q>,
+        <L2R as Container>::Key: Borrow<Q>,
+    {
+        self.left_to_right.get(left)
+    }
+
+    /// Returns the container holding right-side values associated with given
+    /// left-side key.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use multi_bimap::MultiBimap;
+    /// use std::collections::{HashMap, HashSet};
+    ///
+    /// let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
+    ///
+    /// m.insert("a", 1);
+    /// m.insert("b", 1);
+    ///
+    /// assert_eq!(m.get_by_right(&1), Some(&HashSet::from(["a", "b"])));
+    /// assert_eq!(m.get_by_right(&2), None);
+    /// ```
+    pub fn get_by_right<Q: ?Sized>(&self, right: &Q) -> Option<&<R2L as Container>::Value>
+    where
+        R2L: Get<<R2L as Container>::Key, Q>,
+        <R2L as Container>::Key: Borrow<Q>,
+    {
+        self.right_to_left.get(right)
     }
 }
 
@@ -95,7 +153,10 @@ where
     /// Both sides may map to multiple values.
     ///
     /// Returns any values that have been displaced on each side by this
-    /// insertion.
+    /// insertion. This can happen if a value container with finite maximum
+    /// number of elements is used. For example, [`maplike::one::One`] and
+    /// [`Box`] can hold only one element and will always have it displaced and
+    /// returned upon insertion.
     ///
     /// # Examples
     ///
@@ -109,9 +170,7 @@ where
     /// m.insert("a", 2);
     /// m.insert("b", 1);
     ///
-    /// let mut a_rights: Vec<_> = m.left_to_right().get(&"a").unwrap().iter().copied().collect();
-    /// a_rights.sort();
-    /// assert_eq!(a_rights, [1, 2]);
+    /// assert_eq!(m.get_by_left("a"), Some(&HashSet::from([1, 2])));
     /// ```
     pub fn insert(
         &mut self,
@@ -218,9 +277,7 @@ where
     /// assert_eq!(m.remove(&"a", &1), Some(("a", 1)));
     /// assert_eq!(m.remove(&"a", &1), None);
     ///
-    /// let mut a_rights: Vec<_> = m.left_to_right().get(&"a").unwrap().iter().copied().collect();
-    /// a_rights.sort();
-    /// assert_eq!(a_rights, [2]);
+    /// assert_eq!(m.get_by_left("a"), Some(&HashSet::from([2])));
     /// ```
     pub fn remove(
         &mut self,
@@ -300,41 +357,25 @@ mod tests {
     use super::*;
     use std::collections::{HashMap, HashSet};
 
-    fn sorted_values<T: Copy + Ord>(set: &HashSet<T>) -> Vec<T> {
-        let mut v: Vec<_> = set.iter().copied().collect();
-        v.sort();
-        v
-    }
-
     #[test]
     fn insert_allows_many_on_both_sides() {
-        let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
+        let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> =
+            MultiBimap::new();
 
         m.insert("a", 1);
         m.insert("a", 2);
         m.insert("b", 1);
 
-        assert_eq!(
-            m.left_to_right().get(&"a").map(sorted_values),
-            Some(vec![1, 2])
-        );
-        assert_eq!(
-            m.left_to_right().get(&"b").map(sorted_values),
-            Some(vec![1])
-        );
-        assert_eq!(
-            m.right_to_left().get(&1).map(sorted_values),
-            Some(vec!["a", "b"]),
-        );
-        assert_eq!(
-            m.right_to_left().get(&2).map(sorted_values),
-            Some(vec!["a"])
-        );
+        assert_eq!(m.get_by_left("a"), Some(&HashSet::from([1, 2])));
+        assert_eq!(m.get_by_left("b"), Some(&HashSet::from([1])));
+        assert_eq!(m.get_by_right(&1), Some(&HashSet::from(["a", "b"])));
+        assert_eq!(m.get_by_right(&2), Some(&HashSet::from(["a"])));
     }
 
     #[test]
     fn remove_pair_and_drop_empty_keys() {
-        let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
+        let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> =
+            MultiBimap::new();
 
         m.insert("a", 1);
         m.insert("a", 2);
@@ -343,23 +384,18 @@ mod tests {
         assert_eq!(m.remove(&"a", &1), Some(("a", 1)));
         assert_eq!(m.remove(&"a", &1), None);
 
-        assert_eq!(
-            m.left_to_right().get(&"a").map(sorted_values),
-            Some(vec![2])
-        );
-        assert_eq!(
-            m.right_to_left().get(&1).map(sorted_values),
-            Some(vec!["b"])
-        );
+        assert_eq!(m.get_by_left("a"), Some(&HashSet::from([2])));
+        assert_eq!(m.get_by_right(&1), Some(&HashSet::from(["b"])));
 
         assert_eq!(m.remove(&"a", &2), Some(("a", 2)));
-        assert!(m.left_to_right().get(&"a").is_none());
-        assert!(m.right_to_left().get(&2).is_none());
+        assert!(m.get_by_left("a").is_none());
+        assert!(m.get_by_right(&2).is_none());
     }
 
     #[test]
     fn clear_empties_both_sides() {
-        let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
+        let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> =
+            MultiBimap::new();
 
         m.insert("a", 1);
         m.insert("b", 2);
