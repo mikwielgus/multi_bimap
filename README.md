@@ -55,3 +55,35 @@ assert_eq!(m.get_by_right(&1), Some(&HashSet::from(["a", "b"])));
 // Remove one association; empty keys are dropped automatically.
 assert_eq!(m.remove(&"a", &1), Some(("a", 1)));
 ```
+
+## Documentation
+
+See the [documentation](https://docs.rs/undoredo/latest/undoredo) for more information
+on `undoredo`'s usage.
+
+## Packaging
+
+`undoredo` is published as a [crate](https://crates.io/crates/undoredo) on the
+[Crates.io](https://crates.io/) registry.
+
+## Contributing
+
+We welcome issues, pull requests and any other contributions from anyone to our
+[repository](https://github.com/mikwielgus/undoredo) on GitHub.
+
+## Licence
+
+### Outbound licence
+
+`multi_bimap` is dual-licensed as under
+
+- [MIT license](./LICENSES/MIT.txt), or
+- [Apache License, Version 2.0](./LICENSES/Apache-2.0.txt).
+
+at your option.
+
+### Inbound licence
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in this work by you will be dual-licensed as described above,
+without any additional terms or conditions.
