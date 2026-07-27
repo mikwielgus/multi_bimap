@@ -16,9 +16,10 @@ Many-to-many bidirectional map in Rust.
 This crate provides a `MultiBimap` struct, a bidirectional multimap that is
 implemented as two antiparallel multimaps that are kept in sync.
 
-This structure is also known under many other names: *bi-multimap*,
-*multi-bimap*, or sometimes even just *bimap*; in set theory, it's simply called
-a *relation*; in graph theory, it's the same as a *bipartite graph*.
+The bidirectional multimap relation is known under many other names:
+*bi-multimap*, *multi-bimap*, or sometimes even just *bimap*; in set theory,
+it's simply called a *relation*; in graph theory, it's the same as a *bipartite
+graph*.
 
 ## Usage
 
@@ -33,27 +34,50 @@ multi_bimap = "0.2.0"
 
 ### Example
 
-A `MultiBimap` keeps two antiparallel multimaps in sync; each side may map a key
-to multiple values. You can look up associations in either direction.
+In academic publishing, the relation between authors and academic papers is
+many-to-many; it is a bipartite graph: each author may have many papers, and
+each paper may have many authors. A `MultiBimap` can fully represent that:
 
 ```rust
 use multi_bimap::MultiBimap;
 use std::collections::{HashMap, HashSet};
 
-let mut m: MultiBimap<HashMap<&str, HashSet<i32>>, HashMap<i32, HashSet<&str>>> = MultiBimap::new();
+let mut authorship: MultiBimap<
+    HashMap<&'static str, HashSet<&'static str>>,
+    HashMap<&'static str, HashSet<&'static str>>,
+> = MultiBimap::new();
 
-m.insert("a", 1);
-m.insert("a", 2);
-m.insert("b", 1);
+authorship.insert("Alan Turing", "On Computable Numbers");
+authorship.insert("Alan Turing", "Computing Machinery and Intelligence");
+authorship.insert("Ada Lovelace", "Notes on the Analytical Engine");
+authorship.insert("Charles Babbage", "Notes on the Analytical Engine");
 
-// Look up all right values for a left key.
-assert_eq!(m.get_by_left("a"), Some(&HashSet::from([1, 2])));
+// Papers by one author.
+assert_eq!(
+    authorship.get_by_left("Alan Turing"),
+    Some(&HashSet::from([
+        "On Computable Numbers",
+        "Computing Machinery and Intelligence",
+    ])),
+);
 
-// Look up all left values for a right key.
-assert_eq!(m.get_by_right(&1), Some(&HashSet::from(["a", "b"])));
+// Authors of one paper.
+assert_eq!(
+    authorship.get_by_right("Notes on the Analytical Engine"),
+    Some(&HashSet::from(["Ada Lovelace", "Charles Babbage"])),
+);
 
-// Remove one association; empty keys are dropped automatically.
-assert_eq!(m.remove(&"a", &1), Some(("a", 1)));
+// Remove one author-paper association. Empty keys will disappear from both
+// sides.
+assert_eq!(
+    authorship.remove(&"Charles Babbage", &"Notes on the Analytical Engine"),
+    Some(("Charles Babbage", "Notes on the Analytical Engine")),
+);
+assert_eq!(
+    authorship.get_by_right("Notes on the Analytical Engine"),
+    Some(&HashSet::from(["Ada Lovelace"])),
+);
+assert_eq!(authorship.get_by_left("Charles Babbage"), None);
 ```
 
 ## Documentation
