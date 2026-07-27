@@ -226,8 +226,12 @@ where
     R2L: Get<<R2L as Container>::Key>
         + Modify<<R2L as Container>::Key>
         + Remove<<R2L as Container>::Key>,
-    <L2R as Container>::Value: Remove<<R2L as Container>::Key, Output = bool> + Default + PartialEq,
-    <R2L as Container>::Value: Remove<<L2R as Container>::Key, Output = bool> + Default + PartialEq,
+    <L2R as Container>::Value: Remove<<R2L as Container>::Key, Output = Option<()>>
+        + Default
+        + PartialEq,
+    <R2L as Container>::Value: Remove<<L2R as Container>::Key, Output = Option<()>>
+        + Default
+        + PartialEq,
     <L2R as Container>::Key: Clone,
     <R2L as Container>::Key: Clone,
 {
@@ -251,8 +255,12 @@ where
     R2L: Get<<R2L as Container>::Key>
         + Modify<<R2L as Container>::Key>
         + Remove<<R2L as Container>::Key>,
-    <L2R as Container>::Value: Remove<<R2L as Container>::Key, Output = bool> + Default + PartialEq,
-    <R2L as Container>::Value: Remove<<L2R as Container>::Key, Output = bool> + Default + PartialEq,
+    <L2R as Container>::Value: Remove<<R2L as Container>::Key, Output = Option<()>>
+        + Default
+        + PartialEq,
+    <R2L as Container>::Value: Remove<<L2R as Container>::Key, Output = Option<()>>
+        + Default
+        + PartialEq,
     <L2R as Container>::Key: Clone,
     <R2L as Container>::Key: Clone,
 {
@@ -288,7 +296,7 @@ where
 
         if self.left_to_right.get(left).is_some() {
             self.left_to_right.modify(left, |rights| {
-                present = rights.remove(right);
+                present = rights.remove(right).is_some();
             });
 
             if present && self.left_to_right.get(left) == Some(&Default::default()) {
@@ -300,7 +308,7 @@ where
             let mut present_right = false;
 
             self.right_to_left.modify(right, |lefts| {
-                present_right = lefts.remove(left);
+                present_right = lefts.remove(left).is_some();
             });
 
             if present_right && self.right_to_left.get(right) == Some(&Default::default()) {
