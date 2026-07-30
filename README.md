@@ -32,7 +32,7 @@ under many other names: *bi-multimap*, *multi-bimap*, or sometimes even just
 *bimap*; in set theory, it's simply called a *relation*; in graph theory, it's
 the same as a *bipartite graph*.
 
-This crate is compatible with `undoredo` and `serde`.
+This crate is compatible with `no_std`, `undoredo` and `serde`.
 
 ## Usage
 

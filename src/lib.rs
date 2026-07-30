@@ -9,7 +9,10 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 //#![deny(missing_docs)] // Temporary until I fix this missing docs `undoredo` derives.
 #![forbid(unsafe_code)]
-//#![no_std]
+#![no_std]
+
+#[cfg(feature = "std")]
+extern crate std;
 
 use core::borrow::Borrow;
 
@@ -362,7 +365,7 @@ where
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use std::collections::{HashMap, HashSet};
