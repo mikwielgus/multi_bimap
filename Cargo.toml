@@ -26,6 +26,7 @@ serde = ["dep:serde"]
 undoredo = ["dep:undoredo"]
 
 [dependencies]
+document-features = { version = "0.2", optional = true }
 maplike = "0.13.0"
 serde = { version = "1.0", optional = true, default-features = false, features = ["derive", "alloc"] }
 undoredo = { version = "0.13", features = ["derive"], optional = true }
