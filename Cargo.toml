@@ -18,8 +18,13 @@ edition = "2024"
 [badges]
 maintenance = { status = "actively-developed" }
 
+[features]
+## Enables `undoredo` support.
+undoredo = ["dep:undoredo"]
+
 [dependencies]
 maplike = "0.13.0"
+undoredo = { version = "0.13", features = ["derive"], optional = true }
 
 [package.metadata.docs.rs]
 cargo-args = ["--all-features", "-Zunstable-options", "-Zrustdoc-scrape-examples"]

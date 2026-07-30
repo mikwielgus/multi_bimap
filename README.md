@@ -19,6 +19,7 @@ implemented as two antiparallel multimaps that are kept in sync.
 You can arbitrarily choose what should be the types of the constituent
 multimaps: for example, `HashMap<&str, HashSet<&str>>`, `BTreeMap<i64,
 Vec<&str>>`, `indexmap::IndexMap<&str, Box<(i64, i64)>` are all valid options.
+
 Even better, these multimaps can have mixed types (e.g. `HashMap` of `HashSet`s
 pointing rightwards, `BTreeMap` of `Box`es pointing leftwards), so you can also
 have one-to-many or many-to-one bimaps as well (one-to-one bimap is obviously
@@ -30,6 +31,8 @@ This bidirectional multimap relation that `MultiBimap` models is also known
 under many other names: *bi-multimap*, *multi-bimap*, or sometimes even just
 *bimap*; in set theory, it's simply called a *relation*; in graph theory, it's
 the same as a *bipartite graph*.
+
+This crate is compatible with `undoredo`.
 
 ## Usage
 

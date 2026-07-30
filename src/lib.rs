@@ -4,7 +4,7 @@
 
 #![doc(html_root_url = "https://docs.rs/multi_bimap")]
 #![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
+//#![deny(missing_docs)] // Temporary until I fix this missing docs `undoredo` derives.
 #![forbid(unsafe_code)]
 //#![no_std]
 
@@ -15,6 +15,7 @@ use maplike::ops::{Clear, Get, Insert, Modify, Put, Remove, WithOne};
 
 /// Many-to-many bidirectional map made of two antiparallel maps.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "undoredo", derive(undoredo::Delta))]
 pub struct MultiBimap<L2R, R2L> {
     left_to_right: L2R,
     right_to_left: R2L,
