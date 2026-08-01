@@ -4,7 +4,7 @@
 
 [package]
 name = "multi_bimap"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Mikolaj Wielgus <wielgusmikolaj@gmail.com>"]
 description = "Many-to-many bidirectional map in Rust."
 repository = "https://github.com/mikwielgus/multi_bimap"
