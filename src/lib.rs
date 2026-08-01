@@ -23,7 +23,7 @@ use maplike::ops::{Clear, Get, Insert, Modify, Put, Remove, WithOne};
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "undoredo", derive(undoredo::Delta))]
-pub struct MultiBimap<L2R, R2L = L2R> {
+pub struct MultiBimap<L2R, R2L> {
     left_to_right: L2R,
     right_to_left: R2L,
 }

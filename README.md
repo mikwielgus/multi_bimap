@@ -58,7 +58,8 @@ use multi_bimap::MultiBimap;
 use std::collections::{HashMap, HashSet};
 
 let mut authorship: MultiBimap<
-    HashMap<&str, HashSet<&str>>,
+    HashMap<&'static str, HashSet<&'static str>>,
+    HashMap<&'static str, HashSet<&'static str>>,
 > = MultiBimap::new();
 
 authorship.insert("Alan Turing", "On Computable Numbers");
