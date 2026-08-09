@@ -47,7 +47,7 @@ First, add `multi_bimap` as a dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-multi_bimap = "0.3.1"
+multi_bimap = "0.4.0"
 ```
 
 ### Examples
