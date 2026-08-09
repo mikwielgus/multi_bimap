@@ -22,7 +22,17 @@ extern crate alloc;
 use core::borrow::Borrow;
 
 use maplike::containers::Container;
+use maplike::one::One;
 use maplike::ops::{Clear, Get, Insert, Modify, Put, Remove, WithOne};
+
+#[cfg(feature = "std")]
+#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
+/// One-to-one bimap made of two antiparallel hash maps.
+pub type HashBimap<L, R> =
+    MultiBimap<std::collections::HashMap<L, One<R>>, std::collections::HashMap<R, One<L>>>;
+/// One-to-one bimap made of two antiparallel B-tree maps.
+pub type BTreeBimap<L, R> =
+    MultiBimap<alloc::collections::BTreeMap<L, One<R>>, alloc::collections::BTreeMap<R, One<L>>>;
 
 #[cfg(feature = "std")]
 #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
