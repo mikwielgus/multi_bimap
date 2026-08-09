@@ -11,13 +11,70 @@
 #![forbid(unsafe_code)]
 #![no_std]
 
+// There's a lot of `<... as Container>` down here because it fixes a compiler
+// error that seems to happen due to some type circularity.
+
 #[cfg(feature = "std")]
 extern crate std;
+
+extern crate alloc;
 
 use core::borrow::Borrow;
 
 use maplike::containers::Container;
 use maplike::ops::{Clear, Get, Insert, Modify, Put, Remove, WithOne};
+
+#[cfg(feature = "std")]
+#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
+/// Many-to-many bimap made of two antiparallel hash-set-valued hash maps.
+pub type HashMultiBimap<L, R> = MultiBimap<
+    std::collections::HashMap<L, std::collections::HashSet<R>>,
+    std::collections::HashMap<R, std::collections::HashSet<L>>,
+>;
+#[cfg(feature = "std")]
+#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
+/// Many-to-many bimap made of two antiparallel hash-set-valued hash maps.
+pub type HashHashMultiBimap<L, R> = MultiBimap<
+    std::collections::HashMap<L, std::collections::HashSet<R>>,
+    std::collections::HashMap<R, std::collections::HashSet<L>>,
+>;
+#[cfg(feature = "std")]
+#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
+/// Many-to-many bimap made of two antiparallel B-tree-set-valued hash maps.
+pub type HashBTreeMultiBimap<L, R> = MultiBimap<
+    std::collections::HashMap<L, alloc::collections::BTreeSet<R>>,
+    std::collections::HashMap<R, alloc::collections::BTreeSet<L>>,
+>;
+#[cfg(feature = "std")]
+#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
+/// Many-to-many bimap made of two antiparallel vec-valued hash maps.
+pub type HashVecMultiBimap<L, R> = MultiBimap<
+    std::collections::HashMap<L, alloc::collections::BTreeSet<R>>,
+    std::collections::HashMap<R, alloc::collections::BTreeSet<L>>,
+>;
+
+/// Many-to-many bimap made of two antiparallel B-tree-set-valued B-tree maps.
+pub type BTreeMultiBimap<L, R> = MultiBimap<
+    alloc::collections::BTreeMap<L, alloc::collections::BTreeSet<R>>,
+    alloc::collections::BTreeMap<R, alloc::collections::BTreeSet<L>>,
+>;
+/// Many-to-many bimap made of two antiparallel B-tree-set-valued B-tree maps.
+pub type BTreeBTreeMultiBimap<L, R> = MultiBimap<
+    alloc::collections::BTreeMap<L, alloc::collections::BTreeSet<R>>,
+    alloc::collections::BTreeMap<R, alloc::collections::BTreeSet<L>>,
+>;
+#[cfg(feature = "std")]
+#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
+/// Many-to-many bimap made of two antiparallel B-tree-set-valued B-tree maps.
+pub type BTreeHashMultiBimap<L, R> = MultiBimap<
+    alloc::collections::BTreeMap<L, std::collections::HashSet<R>>,
+    alloc::collections::BTreeMap<R, std::collections::HashSet<L>>,
+>;
+/// Many-to-many bimap made of two antiparallel vec-valued B-tree maps.
+pub type BTreeVecMultiBimap<L, R> = MultiBimap<
+    alloc::collections::BTreeMap<L, alloc::vec::Vec<R>>,
+    alloc::collections::BTreeMap<R, alloc::vec::Vec<L>>,
+>;
 
 /// Many-to-many bidirectional map made of two antiparallel maps.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
