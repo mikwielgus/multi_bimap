@@ -73,37 +73,61 @@ let mut authorship: HashMultiBimap<&str, &str> = HashMultiBimap::new();
     HashMap<&str, HashSet<&str>>,
 > = MultiBimap::new();*/
 
-authorship.insert("Alan Turing", "On Computable Numbers");
-authorship.insert("Alan Turing", "Computing Machinery and Intelligence");
-authorship.insert("Ada Lovelace", "Notes on the Analytical Engine");
-authorship.insert("Charles Babbage", "Notes on the Analytical Engine");
+authorship.insert("Stefan Banach", "Sur les opérations dans les ensembles abstraits");
+authorship.insert("Stefan Banach", "Théorie des opérations linéaires");
+authorship.insert("Stefan Banach", "Sur le principe de la condensation des singularités");
+authorship.insert("Hugo Steinhaus", "Sur le principe de la condensation des singularités");
 
-// Papers by one author.
+// Papers where Stefan Banach is an author.
 assert_eq!(
-    authorship.get_by_left("Alan Turing"),
+    authorship.get_by_left("Stefan Banach"),
     Some(&HashSet::from([
-        "On Computable Numbers",
-        "Computing Machinery and Intelligence",
+        "Sur les opérations dans les ensembles abstraits",
+        "Théorie des opérations linéaires",
+        "Sur le principe de la condensation des singularités",
     ])),
 );
 
-// Authors of one paper.
+// "Sur le principe de la condensation des singularités" has two authors; it was
+// co-authored by Stefan Banach and Hugo Steinhaus.
 assert_eq!(
-    authorship.get_by_right("Notes on the Analytical Engine"),
-    Some(&HashSet::from(["Ada Lovelace", "Charles Babbage"])),
+    authorship.get_by_right("Sur le principe de la condensation des singularités"),
+    Some(&HashSet::from(["Stefan Banach", "Hugo Steinhaus"])),
 );
 
-// Remove one author-paper association. Empty keys will disappear from both
-// sides.
+// As an example, remove one author-paper association, of Hugo Steinhaus with
+// this paper. Empty keys will disappear from both sides.
 assert_eq!(
-    authorship.remove(&"Charles Babbage", &"Notes on the Analytical Engine"),
-    Some(("Charles Babbage", "Notes on the Analytical Engine")),
+    authorship.remove(
+        &"Hugo Steinhaus",
+        &"Sur le principe de la condensation des singularités",
+    ),
+    Some((
+        "Hugo Steinhaus",
+        "Sur le principe de la condensation des singularités",
+    )),
 );
 assert_eq!(
-    authorship.get_by_right("Notes on the Analytical Engine"),
-    Some(&HashSet::from(["Ada Lovelace"])),
+    authorship.get_by_right("Sur le principe de la condensation des singularités"),
+    Some(&HashSet::from(["Stefan Banach"])),
 );
-assert_eq!(authorship.get_by_left("Charles Babbage"), None);
+assert_eq!(authorship.get_by_left("Hugo Steinhaus"), None);
+
+// Restore Hugo Steinhaus as co-author.
+authorship.insert(
+    "Hugo Steinhaus",
+    "Sur le principe de la condensation des singularités",
+);
+assert_eq!(
+    authorship.get_by_right("Sur le principe de la condensation des singularités"),
+    Some(&HashSet::from(["Stefan Banach", "Hugo Steinhaus"])),
+);
+assert_eq!(
+    authorship.get_by_left("Hugo Steinhaus"),
+    Some(&HashSet::from([
+        "Sur le principe de la condensation des singularités",
+    ])),
+);
 ```
 
 #### One-to-one bidirectional map
@@ -144,8 +168,8 @@ assert_eq!(
 assert_eq!(capitals.get_by_left("Lithuania"), Some(&One::new("Kaunas")));
 
 // After Lithuania regained Vilnius in 1939, as a side effect of Nazi Germany's
-// and Soviet Union's joint invasion of Poland, it was restored as Lithuania's
-// capital.
+// and Soviet Union's joint invasion and annexation of Poland, it was restored
+// as Lithuania's capital.
 assert_eq!(
     capitals.insert("Lithuania", "Vilnius"),
     (Some("Kaunas"), None),
