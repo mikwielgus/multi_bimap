@@ -39,3 +39,13 @@ undoredo = { version = "0.13", features = ["derive"], optional = true }
 [package.metadata.docs.rs]
 cargo-args = ["--all-features", "-Zunstable-options", "-Zrustdoc-scrape-examples"]
 rustdoc-args = ["--cfg", "docsrs"]
+
+[[example]]
+name = "authors_and_papers"
+required-features = ["std"]
+doc-scrape-examples = true
+
+[[example]]
+name = "countries_and_capitals"
+required-features = ["std"]
+doc-scrape-examples = true

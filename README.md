@@ -61,73 +61,75 @@ and each paper may have many authors. A `MultiBimap` (here under alias
 
 ```rust
 use multi_bimap::HashMultiBimap;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
-let mut authorship: HashMultiBimap<&str, &str> = HashMultiBimap::new();
+fn main() {
+    let mut authorship: HashMultiBimap<&str, &str> = HashMultiBimap::new();
 
-// `HashMultiBimap` is an alias for a multi-bimap made of two antiparallel hash
-// maps with hash sets as values. Without alias the above line would be this:
+    // `HashMultiBimap` is an alias for a multi-bimap made of two antiparallel hash
+    // maps with hash sets as values. Without alias the above line would be this:
 
-/*let mut authorship: MultiBimap<
-    HashMap<&str, HashSet<&str>>,
-    HashMap<&str, HashSet<&str>>,
-> = MultiBimap::new();*/
+    /*let mut authorship: MultiBimap<
+        HashMap<&str, HashSet<&str>>,
+        HashMap<&str, HashSet<&str>>,
+    > = MultiBimap::new();*/
 
-authorship.insert("Stefan Banach", "Sur les opérations dans les ensembles abstraits");
-authorship.insert("Stefan Banach", "Théorie des opérations linéaires");
-authorship.insert("Stefan Banach", "Sur le principe de la condensation des singularités");
-authorship.insert("Hugo Steinhaus", "Sur le principe de la condensation des singularités");
+    authorship.insert("Stefan Banach", "Sur les opérations dans les ensembles abstraits");
+    authorship.insert("Stefan Banach", "Théorie des opérations linéaires");
+    authorship.insert("Stefan Banach", "Sur le principe de la condensation des singularités");
+    authorship.insert("Hugo Steinhaus", "Sur le principe de la condensation des singularités");
 
-// Papers where Stefan Banach is an author.
-assert_eq!(
-    authorship.get_by_left("Stefan Banach"),
-    Some(&HashSet::from([
-        "Sur les opérations dans les ensembles abstraits",
-        "Théorie des opérations linéaires",
-        "Sur le principe de la condensation des singularités",
-    ])),
-);
+    // Papers where Stefan Banach is an author.
+    assert_eq!(
+        authorship.get_by_left("Stefan Banach"),
+        Some(&HashSet::from([
+            "Sur les opérations dans les ensembles abstraits",
+            "Théorie des opérations linéaires",
+            "Sur le principe de la condensation des singularités",
+        ])),
+    );
 
-// "Sur le principe de la condensation des singularités" has two authors; it was
-// co-authored by Stefan Banach and Hugo Steinhaus.
-assert_eq!(
-    authorship.get_by_right("Sur le principe de la condensation des singularités"),
-    Some(&HashSet::from(["Stefan Banach", "Hugo Steinhaus"])),
-);
+    // "Sur le principe de la condensation des singularités" has two authors; it was
+    // co-authored by Stefan Banach and Hugo Steinhaus.
+    assert_eq!(
+        authorship.get_by_right("Sur le principe de la condensation des singularités"),
+        Some(&HashSet::from(["Stefan Banach", "Hugo Steinhaus"])),
+    );
 
-// As an example, remove one author-paper association, of Hugo Steinhaus with
-// this paper. Empty keys will disappear from both sides.
-assert_eq!(
-    authorship.remove(
-        &"Hugo Steinhaus",
-        &"Sur le principe de la condensation des singularités",
-    ),
-    Some((
+    // As an example, remove one author-paper association, of Hugo Steinhaus with
+    // this paper. Empty keys will disappear from both sides.
+    assert_eq!(
+        authorship.remove(
+            &"Hugo Steinhaus",
+            &"Sur le principe de la condensation des singularités",
+        ),
+        Some((
+            "Hugo Steinhaus",
+            "Sur le principe de la condensation des singularités",
+        )),
+    );
+    assert_eq!(
+        authorship.get_by_right("Sur le principe de la condensation des singularités"),
+        Some(&HashSet::from(["Stefan Banach"])),
+    );
+    assert_eq!(authorship.get_by_left("Hugo Steinhaus"), None);
+
+    // Restore Hugo Steinhaus as co-author.
+    authorship.insert(
         "Hugo Steinhaus",
         "Sur le principe de la condensation des singularités",
-    )),
-);
-assert_eq!(
-    authorship.get_by_right("Sur le principe de la condensation des singularités"),
-    Some(&HashSet::from(["Stefan Banach"])),
-);
-assert_eq!(authorship.get_by_left("Hugo Steinhaus"), None);
-
-// Restore Hugo Steinhaus as co-author.
-authorship.insert(
-    "Hugo Steinhaus",
-    "Sur le principe de la condensation des singularités",
-);
-assert_eq!(
-    authorship.get_by_right("Sur le principe de la condensation des singularités"),
-    Some(&HashSet::from(["Stefan Banach", "Hugo Steinhaus"])),
-);
-assert_eq!(
-    authorship.get_by_left("Hugo Steinhaus"),
-    Some(&HashSet::from([
-        "Sur le principe de la condensation des singularités",
-    ])),
-);
+    );
+    assert_eq!(
+        authorship.get_by_right("Sur le principe de la condensation des singularités"),
+        Some(&HashSet::from(["Stefan Banach", "Hugo Steinhaus"])),
+    );
+    assert_eq!(
+        authorship.get_by_left("Hugo Steinhaus"),
+        Some(&HashSet::from([
+            "Sur le principe de la condensation des singularités",
+        ])),
+    );
+}
 ```
 
 #### One-to-one bidirectional map
@@ -139,43 +141,44 @@ capital, and each capital belongs to one country. `MultiBimap` (here under alias
 ```rust
 use maplike::one::One;
 use multi_bimap::HashBimap;
-use std::collections::HashMap;
 
-let mut capitals: HashBimap<&str, &str> = HashBimap::new();
+fn main() {
+    let mut capitals: HashBimap<&str, &str> = HashBimap::new();
 
-// `HashBimap` is an alias for a one-to-one bimap made of two antiparallel hash
-// maps with `One` as value type. `One` is a special container that can hold
-// only one element that gets displaced upon insert. Without alias the above
-// line would be this:
+    // `HashBimap` is an alias for a one-to-one bimap made of two antiparallel hash
+    // maps with `One` as value type. `One` is a special container that can hold
+    // only one element that gets displaced upon insert. Without alias the above
+    // line would be this:
 
-/*let mut capitals: MultiBimap<
-    HashMap<&str, One<&str>>,
-    HashMap<&str, One<&str>>,
-> = MultiBimap::new();*/
+    /*let mut capitals: MultiBimap<
+        HashMap<&str, One<&str>>,
+        HashMap<&str, One<&str>>,
+    > = MultiBimap::new();*/
 
-capitals.insert("Poland", "Warsaw");
-capitals.insert("France", "Paris");
-capitals.insert("Lithuania", "Vilnius");
+    capitals.insert("Poland", "Warsaw");
+    capitals.insert("France", "Paris");
+    capitals.insert("Lithuania", "Vilnius");
 
-// Unfortunately, in 1920, Vilnius was annexed by Poland and held until 1939,
-// a shameful episode in Polish history. During that period Lithuania's capital
-// was Kaunas.
-assert_eq!(
-    capitals.insert("Lithuania", "Kaunas"),
-    (Some("Vilnius"), None),
-);
+    // Unfortunately, in 1920, Vilnius was annexed by Poland and held until 1939,
+    // a shameful episode in Polish history. During that period Lithuania's capital
+    // was Kaunas.
+    assert_eq!(
+        capitals.insert("Lithuania", "Kaunas"),
+        (Some("Vilnius"), None),
+    );
 
-assert_eq!(capitals.get_by_left("Lithuania"), Some(&One::new("Kaunas")));
+    assert_eq!(capitals.get_by_left("Lithuania"), Some(&One::new("Kaunas")));
 
-// After Lithuania regained Vilnius in 1939, as a side effect of Nazi Germany's
-// and Soviet Union's joint invasion and annexation of Poland, it was restored
-// as Lithuania's capital.
-assert_eq!(
-    capitals.insert("Lithuania", "Vilnius"),
-    (Some("Kaunas"), None),
-);
+    // After Lithuania regained Vilnius in 1939, as a side effect of Nazi Germany's
+    // and Soviet Union's joint invasion and annexation of Poland, it was restored
+    // as Lithuania's capital.
+    assert_eq!(
+        capitals.insert("Lithuania", "Vilnius"),
+        (Some("Kaunas"), None),
+    );
 
-assert_eq!(capitals.get_by_left("Lithuania"), Some(&One::new("Vilnius")));
+    assert_eq!(capitals.get_by_left("Lithuania"), Some(&One::new("Vilnius")));
+}
 ```
 
 ## Documentation
