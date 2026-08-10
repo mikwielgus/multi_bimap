@@ -54,9 +54,10 @@ multi_bimap = "0.4.0"
 
 #### Many-to-many bidirectional map
 
-In academic publishing, the relation between authors and academic papers is
-many-to-many; it is a bipartite graph: each author may have many papers, and
-each paper may have many authors. A `MultiBimap` can fully represent that:
+In academic publishing, the relation between authors and academic papers
+is many-to-many; it is a bipartite graph: each author may have many papers,
+and each paper may have many authors. A `MultiBimap` (here under alias
+`HashMultiBimap`) can fully represent that:
 
 ```rust
 use multi_bimap::HashMultiBimap;
@@ -103,6 +104,54 @@ assert_eq!(
     Some(&HashSet::from(["Ada Lovelace"])),
 );
 assert_eq!(authorship.get_by_left("Charles Babbage"), None);
+```
+
+#### One-to-one bidirectional map
+
+A country and its capital form a one-to-one relation: each country has one
+capital, and each capital belongs to one country. `MultiBimap` (here under alias
+`HashBimap`) can represent that just as well without any additional logic:
+
+```rust
+use maplike::one::One;
+use multi_bimap::HashBimap;
+use std::collections::HashMap;
+
+let mut capitals: HashBimap<&str, &str> = HashBimap::new();
+
+// `HashBimap` is an alias for a one-to-one bimap made of two antiparallel hash
+// maps with `One` as value type. `One` is a special container that can hold
+// only one element that gets displaced upon insert. Without alias the above
+// line would be this:
+
+/*let mut capitals: MultiBimap<
+    HashMap<&str, One<&str>>,
+    HashMap<&str, One<&str>>,
+> = MultiBimap::new();*/
+
+capitals.insert("Poland", "Warsaw");
+capitals.insert("France", "Paris");
+capitals.insert("Lithuania", "Vilnius");
+
+// Unfortunately, in 1920, Vilnius was annexed by Poland and held until 1939,
+// a shameful episode in Polish history. During that period Lithuania's capital
+// was Kaunas.
+assert_eq!(
+    capitals.insert("Lithuania", "Kaunas"),
+    (Some("Vilnius"), None),
+);
+
+assert_eq!(capitals.get_by_left("Lithuania"), Some(&One::new("Kaunas")));
+
+// After Lithuania regained Vilnius in 1939, as a side effect of Nazi Germany's
+// and Soviet Union's joint invasion of Poland, it was restored as Lithuania's
+// capital.
+assert_eq!(
+    capitals.insert("Lithuania", "Vilnius"),
+    (Some("Kaunas"), None),
+);
+
+assert_eq!(capitals.get_by_left("Lithuania"), Some(&One::new("Vilnius")));
 ```
 
 ## Documentation
