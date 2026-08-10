@@ -188,14 +188,16 @@ where
     R2L: Container,
     L2R: Get<<L2R as Container>::Key>
         + Insert<<L2R as Container>::Key>
-        + Modify<<L2R as Container>::Key>,
+        + Modify<<L2R as Container>::Key>
+        + Remove<<L2R as Container>::Key>,
     R2L: Get<<R2L as Container>::Key>
         + Insert<<R2L as Container>::Key>
-        + Modify<<R2L as Container>::Key>,
+        + Modify<<R2L as Container>::Key>
+        + Remove<<R2L as Container>::Key>,
     <L2R as Container>::Value: WithOne<<R2L as Container>::Key> + Put<<R2L as Container>::Key>,
     <R2L as Container>::Value: WithOne<<L2R as Container>::Key> + Put<<L2R as Container>::Key>,
-    <L2R as Container>::Key: Clone,
-    <R2L as Container>::Key: Clone,
+    <L2R as Container>::Key: Clone + PartialEq,
+    <R2L as Container>::Key: Clone + PartialEq,
 {
     type Output = (
         Option<<R2L as Container>::Key>,
@@ -217,10 +219,12 @@ where
     R2L: Container,
     L2R: Get<<L2R as Container>::Key>
         + Insert<<L2R as Container>::Key>
-        + Modify<<L2R as Container>::Key>,
+        + Modify<<L2R as Container>::Key>
+        + Remove<<L2R as Container>::Key>,
     R2L: Get<<R2L as Container>::Key>
         + Insert<<R2L as Container>::Key>
-        + Modify<<R2L as Container>::Key>,
+        + Modify<<R2L as Container>::Key>
+        + Remove<<R2L as Container>::Key>,
     <L2R as Container>::Value: WithOne<<R2L as Container>::Key> + Put<<R2L as Container>::Key>,
     <R2L as Container>::Value: WithOne<<L2R as Container>::Key> + Put<<L2R as Container>::Key>,
 {
@@ -257,8 +261,8 @@ where
         Option<<L2R as Container>::Key>,
     )
     where
-        <L2R as Container>::Key: Clone,
-        <R2L as Container>::Key: Clone,
+        <L2R as Container>::Key: Clone + PartialEq,
+        <R2L as Container>::Key: Clone + PartialEq,
     {
         // PERF: Using Entry API may be faster here, but not all collections
         // support it.
@@ -277,6 +281,15 @@ where
             None
         };
 
+        // A displaced right-side value is no longer associated with `left`, so
+        // drop its reverse entry. Skip when it is the same as `right`; the
+        // right-side update further below will refresh that entry.
+        if let Some(ref old_right) = left_out
+            && old_right != &right
+        {
+            self.right_to_left.remove(old_right);
+        }
+
         let right_out = if self.right_to_left.get(&right).is_some() {
             let mut out = None;
             self.right_to_left.modify(&right, |lefts| {
@@ -284,9 +297,17 @@ where
             });
             out
         } else {
-            self.right_to_left.insert(right, WithOne::with_one(left));
+            self.right_to_left
+                .insert(right.clone(), WithOne::with_one(left.clone()));
             None
         };
+
+        // Same as above for a displaced left-side key.
+        if let Some(ref old_left) = right_out
+            && old_left != &left
+        {
+            self.left_to_right.remove(old_left);
+        }
 
         (left_out, right_out)
     }
@@ -483,5 +504,32 @@ mod tests {
 
         assert!(m.left_to_right().is_empty());
         assert!(m.right_to_left().is_empty());
+    }
+
+    #[test]
+    fn one_to_one_insert_drops_displaced_reverse() {
+        let mut m: HashBimap<&str, &str> = HashBimap::new();
+
+        m.insert("Lithuania", "Vilnius");
+        assert_eq!(m.insert("Lithuania", "Kaunas"), (Some("Vilnius"), None));
+        assert_eq!(m.get_by_left("Lithuania"), Some(&One::new("Kaunas")));
+        assert!(m.get_by_right("Vilnius").is_none());
+        assert_eq!(m.get_by_right("Kaunas"), Some(&One::new("Lithuania")));
+
+        assert_eq!(m.insert("Lithuania", "Vilnius"), (Some("Kaunas"), None));
+        assert_eq!(m.get_by_left("Lithuania"), Some(&One::new("Vilnius")));
+        assert!(m.get_by_right("Kaunas").is_none());
+        assert_eq!(m.get_by_right("Vilnius"), Some(&One::new("Lithuania")));
+    }
+
+    #[test]
+    fn one_to_one_insert_steals_existing_right() {
+        let mut m: HashBimap<&str, &str> = HashBimap::new();
+
+        m.insert("Poland", "Warsaw");
+        assert_eq!(m.insert("Lithuania", "Warsaw"), (None, Some("Poland")));
+        assert_eq!(m.get_by_left("Lithuania"), Some(&One::new("Warsaw")));
+        assert!(m.get_by_left("Poland").is_none());
+        assert_eq!(m.get_by_right("Warsaw"), Some(&One::new("Lithuania")));
     }
 }

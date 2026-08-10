@@ -22,9 +22,9 @@ fn main() {
     capitals.insert("France", "Paris");
     capitals.insert("Lithuania", "Vilnius");
 
-    // Unfortunately, in 1920, Vilnius was annexed by Poland and held until 1939,
-    // a shameful episode in Polish history. During that period Lithuania's capital
-    // was Kaunas.
+    // Unfortunately, in 1920, Vilnius was annexed by Poland and held until
+    // 1939, a regrettable episode in Polish history. During that period
+    // Lithuania's capital was Kaunas.
     assert_eq!(
         capitals.insert("Lithuania", "Kaunas"),
         (Some("Vilnius"), None),
