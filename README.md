@@ -13,11 +13,13 @@ SPDX-License-Identifier: MIT OR Apache-2.0
 
 Many-to-many bidirectional map in Rust.
 
-This crate provides a `MultiBimap` struct, a bidirectional multimap that is
-implemented as two antiparallel multimaps that are kept in sync.
+This crate provides
+[`MultiBimap`](https://docs.rs/multi_bimap/latest/multi_bimap/struct.MultiBimap.html)
+struct, a bidirectional multimap that is implemented as two antiparallel
+multimaps that are kept in sync.
 
 You can arbitrarily choose what should be the types of the constituent
-multimaps: for example, `HashMap<&str, HashSet<&str>>`, `BTreeMap<i64,
+multimaps. `HashMap<&str, HashSet<&str>>`, `BTreeMap<i64,
 Vec<&str>>`, `indexmap::IndexMap<&str, Box<(i64, i64)>` are all valid options.
 
 Even better, these multimaps can have mixed types (e.g. `HashMap` of `HashSet`s
@@ -55,9 +57,10 @@ multi_bimap = "0.6.0"
 #### Many-to-many bidirectional map
 
 In academic publishing, the relation between authors and academic papers
-is many-to-many; it is a bipartite graph: each author may have many papers,
+is many-to-many; it is a bipartite graph. Each author may have many papers,
 and each paper may have many authors. A `MultiBimap` (here under alias
-`HashMultiBimap`) can fully represent that:
+[`HashMultiBimap`](https://docs.rs/multi_bimap/latest/multi_bimap/type.HashMultiBimap.html)
+to shorten generic arguments) can fully represent that:
 
 ```rust
 use multi_bimap::HashMultiBimap;
