@@ -1,0 +1,69 @@
+# SPDX-FileCopyrightText: 2026 this project's contributors
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  reuse-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: fsfe/reuse-action@v6
+        with:
+          args: lint
+
+  cargo-fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all -- --check
+
+  cargo-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain: [1.92, stable]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-hack
+      - run: |
+          cargo test --workspace
+
+          # `--no-default-features` will break doctests, so we pass
+          # `--lib --bins --tests` (no `--doc`) to omit doctests.
+          cargo test --workspace --no-default-features --lib --bins --examples --tests
+
+          cargo test --workspace --all-features
+          cargo hack test --workspace --optional-deps --each-feature --lib --bins --examples --tests
+
+  cargo-check-no-std:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain: [1.92, stable]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          targets: thumbv6m-none-eabi
+      - uses: Swatinem/rust-cache@v2
+      # thumbv6m-none-eabi has no std, so let's build it to make sure we really
+      # are `no_std` compatible.
+      - run: cargo check --target thumbv6m-none-eabi --no-default-features #--features derive
