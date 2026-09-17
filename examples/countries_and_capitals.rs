@@ -32,9 +32,10 @@ fn main() {
 
     assert_eq!(capitals.get_by_left("Lithuania"), Some(&One::new("Kaunas")));
 
-    // After Lithuania regained Vilnius in 1939, as a side effect of Nazi Germany's
-    // and Soviet Union's joint invasion and annexation of Poland, it was restored
-    // as Lithuania's capital.
+    // After Lithuania regained Vilnius in 1939, as a side effect of Nazi
+    // Germany's and Soviet Union's joint invasion and annexation of Poland, it
+    // was restored as Lithuania's capital. (Though soon thereafter, in 1940,
+    // Lithuania was annexed whole by Soviet Union anyway)
     assert_eq!(
         capitals.insert("Lithuania", "Vilnius"),
         (Some("Kaunas"), None),

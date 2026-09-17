@@ -32,12 +32,12 @@ under many other names: *bi-multimap*, *multi-bimap*, or sometimes even just
 *bimap*; in set theory, it's simply called a *relation*; in graph theory, it's
 the same as a *bipartite graph*.
 
-This crate has no `unsafe` code and is compatible with `serde`
-and `undoredo` libraries. It is also `no_std`-compatible, though
-[`alloc`](https://doc.rust-lang.org/alloc/) is still required. There is no
-mandatory third-party dependencies, but there is a first-party dependency on
-[`maplike`](https://github.com/mikwielgus/maplike), a library also developed by
-this library's authors.
+This crate has no `unsafe` code and is compatible with `serde` and
+[`undoredo`](https://github.com/mikwielgus/undoredo) libraries. It is also
+`no_std`-compatible, though [`alloc`](https://doc.rust-lang.org/alloc/) is
+still required. There is no mandatory third-party dependencies, but there is a
+first-party dependency on [`maplike`](https://github.com/mikwielgus/maplike), a
+library also developed by this library's authors.
 
 ## Usage
 
@@ -169,9 +169,10 @@ fn main() {
 
     assert_eq!(capitals.get_by_left("Lithuania"), Some(&One::new("Kaunas")));
 
-    // After Lithuania regained Vilnius in 1939, as a side effect of Nazi Germany's
-    // and Soviet Union's joint invasion and annexation of Poland, it was restored
-    // as Lithuania's capital.
+    // After Lithuania regained Vilnius in 1939, as a side effect of Nazi
+    // Germany's and Soviet Union's joint invasion and annexation of Poland, it
+    // was restored as Lithuania's capital. (Though soon thereafter, in 1940,
+    // Lithuania was annexed whole by Soviet Union anyway)
     assert_eq!(
         capitals.insert("Lithuania", "Vilnius"),
         (Some("Kaunas"), None),

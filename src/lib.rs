@@ -21,12 +21,11 @@ extern crate alloc;
 
 use core::borrow::Borrow;
 
-use maplike::containers::Container;
+use maplike::abc::{Container, Keyed};
 use maplike::one::One;
 use maplike::ops::{Clear, Get, Insert, Modify, Put, Remove, WithOne};
 
 #[cfg(feature = "std")]
-#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 /// One-to-one bimap made of two antiparallel hash maps.
 pub type HashBimap<L, R> =
     MultiBimap<std::collections::HashMap<L, One<R>>, std::collections::HashMap<R, One<L>>>;
@@ -35,28 +34,24 @@ pub type BTreeBimap<L, R> =
     MultiBimap<alloc::collections::BTreeMap<L, One<R>>, alloc::collections::BTreeMap<R, One<L>>>;
 
 #[cfg(feature = "std")]
-#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 /// Many-to-many bimap made of two antiparallel hash-set-valued hash maps.
 pub type HashMultiBimap<L, R> = MultiBimap<
     std::collections::HashMap<L, std::collections::HashSet<R>>,
     std::collections::HashMap<R, std::collections::HashSet<L>>,
 >;
 #[cfg(feature = "std")]
-#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 /// Many-to-many bimap made of two antiparallel hash-set-valued hash maps.
 pub type HashHashMultiBimap<L, R> = MultiBimap<
     std::collections::HashMap<L, std::collections::HashSet<R>>,
     std::collections::HashMap<R, std::collections::HashSet<L>>,
 >;
 #[cfg(feature = "std")]
-#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 /// Many-to-many bimap made of two antiparallel B-tree-set-valued hash maps.
 pub type HashBTreeMultiBimap<L, R> = MultiBimap<
     std::collections::HashMap<L, alloc::collections::BTreeSet<R>>,
     std::collections::HashMap<R, alloc::collections::BTreeSet<L>>,
 >;
 #[cfg(feature = "std")]
-#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 /// Many-to-many bimap made of two antiparallel vec-valued hash maps.
 pub type HashVecMultiBimap<L, R> = MultiBimap<
     std::collections::HashMap<L, alloc::collections::BTreeSet<R>>,
@@ -74,7 +69,6 @@ pub type BTreeBTreeMultiBimap<L, R> = MultiBimap<
     alloc::collections::BTreeMap<R, alloc::collections::BTreeSet<L>>,
 >;
 #[cfg(feature = "std")]
-#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 /// Many-to-many bimap made of two antiparallel B-tree-set-valued B-tree maps.
 pub type BTreeHashMultiBimap<L, R> = MultiBimap<
     alloc::collections::BTreeMap<L, std::collections::HashSet<R>>,
@@ -119,8 +113,8 @@ impl<L2R: Default, R2L: Default> MultiBimap<L2R, R2L> {
 
 impl<L2R, R2L> MultiBimap<L2R, R2L>
 where
-    L2R: Container,
-    R2L: Container,
+    L2R: Keyed,
+    R2L: Keyed,
 {
     /// Returns the container holding right-side values associated with given
     /// left-side key.
@@ -141,8 +135,8 @@ where
     /// ```
     pub fn get_by_left<Q: ?Sized>(&self, left: &Q) -> Option<&<L2R as Container>::Value>
     where
-        L2R: Get<<L2R as Container>::Key, Q>,
-        <L2R as Container>::Key: Borrow<Q>,
+        L2R: Get<Q>,
+        <L2R as Keyed>::Key: Borrow<Q>,
     {
         self.left_to_right.get(left)
     }
@@ -166,67 +160,59 @@ where
     /// ```
     pub fn get_by_right<Q: ?Sized>(&self, right: &Q) -> Option<&<R2L as Container>::Value>
     where
-        R2L: Get<<R2L as Container>::Key, Q>,
-        <R2L as Container>::Key: Borrow<Q>,
+        R2L: Get<Q>,
+        <R2L as Keyed>::Key: Borrow<Q>,
     {
         self.right_to_left.get(right)
     }
 }
 
-impl<L2R, R2L> Container for MultiBimap<L2R, R2L>
-where
-    L2R: Container,
-    R2L: Container,
-{
-    type Key = <L2R as Container>::Key;
-    type Value = <R2L as Container>::Key;
+impl<L2R: Keyed, R2L: Keyed> Container for MultiBimap<L2R, R2L> {
+    type Value = <R2L as Keyed>::Key;
 }
 
-impl<L2R, R2L> Insert<<L2R as Container>::Key> for MultiBimap<L2R, R2L>
-where
-    L2R: Container,
-    R2L: Container,
-    L2R: Get<<L2R as Container>::Key>
-        + Insert<<L2R as Container>::Key>
-        + Modify<<L2R as Container>::Key>
-        + Remove<<L2R as Container>::Key>,
-    R2L: Get<<R2L as Container>::Key>
-        + Insert<<R2L as Container>::Key>
-        + Modify<<R2L as Container>::Key>
-        + Remove<<R2L as Container>::Key>,
-    <L2R as Container>::Value: WithOne<<R2L as Container>::Key> + Put<<R2L as Container>::Key>,
-    <R2L as Container>::Value: WithOne<<L2R as Container>::Key> + Put<<L2R as Container>::Key>,
-    <L2R as Container>::Key: Clone + PartialEq,
-    <R2L as Container>::Key: Clone + PartialEq,
-{
-    type Output = (
-        Option<<R2L as Container>::Key>,
-        Option<<L2R as Container>::Key>,
-    );
+impl<L2R: Keyed, R2L: Keyed> Keyed for MultiBimap<L2R, R2L> {
+    type Key = <L2R as Keyed>::Key;
+}
 
-    fn insert(
-        &mut self,
-        key: <L2R as Container>::Key,
-        value: <R2L as Container>::Key,
-    ) -> Self::Output {
+impl<L2R, R2L> Insert<<L2R as Keyed>::Key> for MultiBimap<L2R, R2L>
+where
+    L2R: Keyed,
+    R2L: Keyed,
+    L2R: Get<<L2R as Keyed>::Key>
+        + Insert<<L2R as Keyed>::Key>
+        + Modify<<L2R as Keyed>::Key>
+        + Remove<<L2R as Keyed>::Key>,
+    R2L: Get<<R2L as Keyed>::Key>
+        + Insert<<R2L as Keyed>::Key>
+        + Modify<<R2L as Keyed>::Key>
+        + Remove<<R2L as Keyed>::Key>,
+    <L2R as Container>::Value: WithOne<<R2L as Keyed>::Key> + Put<<R2L as Keyed>::Key>,
+    <R2L as Container>::Value: WithOne<<L2R as Keyed>::Key> + Put<<L2R as Keyed>::Key>,
+    <L2R as Keyed>::Key: Clone + PartialEq,
+    <R2L as Keyed>::Key: Clone + PartialEq,
+{
+    type Output = (Option<<R2L as Keyed>::Key>, Option<<L2R as Keyed>::Key>);
+
+    fn insert(&mut self, key: <L2R as Keyed>::Key, value: <R2L as Keyed>::Key) -> Self::Output {
         MultiBimap::insert(self, key, value)
     }
 }
 
 impl<L2R, R2L> MultiBimap<L2R, R2L>
 where
-    L2R: Container,
-    R2L: Container,
-    L2R: Get<<L2R as Container>::Key>
-        + Insert<<L2R as Container>::Key>
-        + Modify<<L2R as Container>::Key>
-        + Remove<<L2R as Container>::Key>,
-    R2L: Get<<R2L as Container>::Key>
-        + Insert<<R2L as Container>::Key>
-        + Modify<<R2L as Container>::Key>
-        + Remove<<R2L as Container>::Key>,
-    <L2R as Container>::Value: WithOne<<R2L as Container>::Key> + Put<<R2L as Container>::Key>,
-    <R2L as Container>::Value: WithOne<<L2R as Container>::Key> + Put<<L2R as Container>::Key>,
+    L2R: Keyed,
+    R2L: Keyed,
+    L2R: Get<<L2R as Keyed>::Key>
+        + Insert<<L2R as Keyed>::Key>
+        + Modify<<L2R as Keyed>::Key>
+        + Remove<<L2R as Keyed>::Key>,
+    R2L: Get<<R2L as Keyed>::Key>
+        + Insert<<R2L as Keyed>::Key>
+        + Modify<<R2L as Keyed>::Key>
+        + Remove<<R2L as Keyed>::Key>,
+    <L2R as Container>::Value: WithOne<<R2L as Keyed>::Key> + Put<<R2L as Keyed>::Key>,
+    <R2L as Container>::Value: WithOne<<L2R as Keyed>::Key> + Put<<L2R as Keyed>::Key>,
 {
     /// Insert a left-right association into the bimap.
     ///
@@ -254,15 +240,12 @@ where
     /// ```
     pub fn insert(
         &mut self,
-        left: <L2R as Container>::Key,
-        right: <R2L as Container>::Key,
-    ) -> (
-        Option<<R2L as Container>::Key>,
-        Option<<L2R as Container>::Key>,
-    )
+        left: <L2R as Keyed>::Key,
+        right: <R2L as Keyed>::Key,
+    ) -> (Option<<R2L as Keyed>::Key>, Option<<L2R as Keyed>::Key>)
     where
-        <L2R as Container>::Key: Clone + PartialEq,
-        <R2L as Container>::Key: Clone + PartialEq,
+        <L2R as Keyed>::Key: Clone + PartialEq,
+        <R2L as Keyed>::Key: Clone + PartialEq,
     {
         // PERF: Using Entry API may be faster here, but not all collections
         // support it.
@@ -313,49 +296,41 @@ where
     }
 }
 
-impl<L2R, R2L> Remove<(<L2R as Container>::Key, <R2L as Container>::Key)> for MultiBimap<L2R, R2L>
+impl<L2R, R2L> Remove<(<L2R as Keyed>::Key, <R2L as Keyed>::Key)> for MultiBimap<L2R, R2L>
 where
-    L2R: Container,
-    R2L: Container,
-    L2R: Get<<L2R as Container>::Key>
-        + Modify<<L2R as Container>::Key>
-        + Remove<<L2R as Container>::Key>,
-    R2L: Get<<R2L as Container>::Key>
-        + Modify<<R2L as Container>::Key>
-        + Remove<<R2L as Container>::Key>,
+    L2R: Keyed,
+    R2L: Keyed,
+    L2R: Get<<L2R as Keyed>::Key> + Modify<<L2R as Keyed>::Key> + Remove<<L2R as Keyed>::Key>,
+    R2L: Get<<R2L as Keyed>::Key> + Modify<<R2L as Keyed>::Key> + Remove<<R2L as Keyed>::Key>,
     <L2R as Container>::Value:
-        Remove<<R2L as Container>::Key, Output = Option<()>> + Default + PartialEq,
+        Remove<<R2L as Keyed>::Key, Output = Option<()>> + Default + PartialEq,
     <R2L as Container>::Value:
-        Remove<<L2R as Container>::Key, Output = Option<()>> + Default + PartialEq,
-    <L2R as Container>::Key: Clone,
-    <R2L as Container>::Key: Clone,
+        Remove<<L2R as Keyed>::Key, Output = Option<()>> + Default + PartialEq,
+    <L2R as Keyed>::Key: Clone,
+    <R2L as Keyed>::Key: Clone,
 {
-    type Output = Option<(<L2R as Container>::Key, <R2L as Container>::Key)>;
+    type Output = Option<(<L2R as Keyed>::Key, <R2L as Keyed>::Key)>;
 
     fn remove(
         &mut self,
-        key: &(<L2R as Container>::Key, <R2L as Container>::Key),
-    ) -> Option<(<L2R as Container>::Key, <R2L as Container>::Key)> {
+        key: &(<L2R as Keyed>::Key, <R2L as Keyed>::Key),
+    ) -> Option<(<L2R as Keyed>::Key, <R2L as Keyed>::Key)> {
         MultiBimap::remove(self, &key.0, &key.1)
     }
 }
 
 impl<L2R, R2L> MultiBimap<L2R, R2L>
 where
-    L2R: Container,
-    R2L: Container,
-    L2R: Get<<L2R as Container>::Key>
-        + Modify<<L2R as Container>::Key>
-        + Remove<<L2R as Container>::Key>,
-    R2L: Get<<R2L as Container>::Key>
-        + Modify<<R2L as Container>::Key>
-        + Remove<<R2L as Container>::Key>,
+    L2R: Keyed,
+    R2L: Keyed,
+    L2R: Get<<L2R as Keyed>::Key> + Modify<<L2R as Keyed>::Key> + Remove<<L2R as Keyed>::Key>,
+    R2L: Get<<R2L as Keyed>::Key> + Modify<<R2L as Keyed>::Key> + Remove<<R2L as Keyed>::Key>,
     <L2R as Container>::Value:
-        Remove<<R2L as Container>::Key, Output = Option<()>> + Default + PartialEq,
+        Remove<<R2L as Keyed>::Key, Output = Option<()>> + Default + PartialEq,
     <R2L as Container>::Value:
-        Remove<<L2R as Container>::Key, Output = Option<()>> + Default + PartialEq,
-    <L2R as Container>::Key: Clone,
-    <R2L as Container>::Key: Clone,
+        Remove<<L2R as Keyed>::Key, Output = Option<()>> + Default + PartialEq,
+    <L2R as Keyed>::Key: Clone,
+    <R2L as Keyed>::Key: Clone,
 {
     /// Remove a left-right association from the bimap.
     ///
@@ -382,9 +357,9 @@ where
     /// ```
     pub fn remove(
         &mut self,
-        left: &<L2R as Container>::Key,
-        right: &<R2L as Container>::Key,
-    ) -> Option<(<L2R as Container>::Key, <R2L as Container>::Key)> {
+        left: &<L2R as Keyed>::Key,
+        right: &<R2L as Keyed>::Key,
+    ) -> Option<(<L2R as Keyed>::Key, <R2L as Keyed>::Key)> {
         let mut present = false;
 
         if self.left_to_right.get(left).is_some() {
