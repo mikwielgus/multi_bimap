@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT OR Apache-2.0
 [![Repository](https://img.shields.io/badge/repository-GitHub-0FBF3E)](https://github.com/mikwielgus/multi_bimap)
 [![Docs](https://docs.rs/multi_bimap/badge.svg)](https://docs.rs/multi_bimap/)
 [![Crates.io](https://img.shields.io/crates/v/multi_bimap.svg)](https://crates.io/crates/multi_bimap)
+[![MSRV](https://img.shields.io/crates/msrv/maplike.svg)](https://blog.rust-lang.org/2025/12/11/Rust-1.92.0/)
 [![MIT OR Apache 2.0](https://img.shields.io/crates/l/multi_bimap.svg)](#licence)
 
 # multi_bimap
@@ -43,7 +44,7 @@ This crate has no `unsafe` code and is compatible with `serde` and
 `no_std`-compatible, though [`alloc`](https://doc.rust-lang.org/alloc/) is
 still required. There is no mandatory third-party dependencies, but there is a
 first-party dependency on [`maplike`](https://github.com/mikwielgus/maplike), a
-library also developed by this library's authors.
+library also developed by this library's authors. MSRV is 1.92.
 
 ## Usage
 
