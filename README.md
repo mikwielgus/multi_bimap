@@ -18,16 +18,20 @@ This crate provides
 struct, a bidirectional multimap that is implemented as two antiparallel
 multimaps that are kept in sync.
 
-You can arbitrarily choose what should be the types of the constituent
-multimaps. `HashMap<&str, HashSet<&str>>`, `BTreeMap<i64,
-Vec<&str>>`, `indexmap::IndexMap<&str, Box<(i64, i64)>` are all valid options.
+You can arbitrarily choose what should be the types of the two constituent
+multimaps. `HashMap<&str, HashSet<&str>>`, `BTreeMap<i64, Vec<&str>>`,
+`indexmap::IndexMap<&str, Box<(i64, i64)>` are all valid options.
 
 Even better, these multimaps can have mixed types (e.g. `HashMap` of `HashSet`s
 pointing rightwards, `BTreeMap` of `Box`es pointing leftwards), so you can also
 have one-to-many or many-to-one bimaps as well (one-to-one bimap is obviously
-also an option). This is possible because `MultiBimap` uses traits from
-[`maplike`](https://github.com/mikwielgus/maplike), a Rust crate which allows to
-have a generic interface over a large number of containers.
+also an option).
+
+All this is possible because `MultiBimap` uses traits from
+[`maplike`](https://github.com/mikwielgus/maplike), a Rust crate which allows
+to have a generic interface over a large number of containers. See [Supported
+containers](https://github.com/mikwielgus/maplike#supported-containers) section
+in its readme for a list of all types that can be used.
 
 This bidirectional multimap relation that `MultiBimap` models is also known
 under many other names: *bi-multimap*, *multi-bimap*, or sometimes even just
