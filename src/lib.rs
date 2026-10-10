@@ -54,8 +54,8 @@ pub type HashBTreeMultiBimap<L, R> = MultiBimap<
 #[cfg(feature = "std")]
 /// Many-to-many bimap made of two antiparallel vec-valued hash maps.
 pub type HashVecMultiBimap<L, R> = MultiBimap<
-    std::collections::HashMap<L, alloc::collections::BTreeSet<R>>,
-    std::collections::HashMap<R, alloc::collections::BTreeSet<L>>,
+    std::collections::HashMap<L, alloc::vec::Vec<R>>,
+    std::collections::HashMap<R, alloc::vec::Vec<L>>,
 >;
 
 /// Many-to-many bimap made of two antiparallel B-tree-set-valued B-tree maps.
@@ -69,7 +69,7 @@ pub type BTreeBTreeMultiBimap<L, R> = MultiBimap<
     alloc::collections::BTreeMap<R, alloc::collections::BTreeSet<L>>,
 >;
 #[cfg(feature = "std")]
-/// Many-to-many bimap made of two antiparallel B-tree-set-valued B-tree maps.
+/// Many-to-many bimap made of two antiparallel hash-set-valued B-tree maps.
 pub type BTreeHashMultiBimap<L, R> = MultiBimap<
     alloc::collections::BTreeMap<L, std::collections::HashSet<R>>,
     alloc::collections::BTreeMap<R, std::collections::HashSet<L>>,
@@ -141,8 +141,8 @@ where
         self.left_to_right.get(left)
     }
 
-    /// Returns the container holding right-side values associated with given
-    /// left-side key.
+    /// Returns the container holding left-side values associated with given
+    /// right-side key.
     ///
     /// # Examples
     ///
