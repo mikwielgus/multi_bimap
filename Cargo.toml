@@ -50,3 +50,8 @@ doc-scrape-examples = true
 name = "countries_and_capitals"
 required-features = ["std"]
 doc-scrape-examples = true
+
+[[example]]
+name = "polish_scientists"
+required-features = ["std"]
+doc-scrape-examples = true

@@ -21,12 +21,14 @@ multimaps that are kept in sync.
 
 You can arbitrarily choose what should be the types of the two constituent
 multimaps. `HashMap<&str, HashSet<&str>>`, `BTreeMap<i64, Vec<&str>>`,
-`indexmap::IndexMap<&str, Box<(i64, i64)>` are all valid options.
+`indexmap::IndexMap<&str, Box<(i64, i64)>` are all valid options. Naturally, in
+case you have keys that are clostly to clone (e.g. large owned `String`), you can
+also just wrap them in [`Rc`](https://doc.rust-lang.org/std/rc/struct.Rc.html) or
+[`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html).
 
 Even better, these multimaps can have mixed types (e.g. `HashMap` of `HashSet`s
 pointing rightwards, `BTreeMap` of `Box`es pointing leftwards), so you can also
-have one-to-many or many-to-one bimaps as well (one-to-one bimap is obviously
-also an option).
+have one-to-many or many-to-one bimaps, or just one-to-one bimaps.
 
 All this is possible because `MultiBimap` uses traits from
 [`maplike`](https://github.com/mikwielgus/maplike), a Rust crate which allows
@@ -39,13 +41,13 @@ under many other names: *bi-multimap*, *multi-bimap*, or sometimes even just
 *bimap*; in set theory, it's simply called a *relation*; in graph theory, it's
 the same as a *bipartite graph*.
 
-This crate has no `unsafe` code and is compatible with
-[`serde`](https://github.com/serde-rs/serde) and
+This crate has no `unsafe` code and is compatible
+with [`serde`](https://github.com/serde-rs/serde) and
 [`undoredo`](https://github.com/mikwielgus/undoredo) libraries. It is also
-`no_std`-compatible, though [`alloc`](https://doc.rust-lang.org/alloc/) is still
-required. There is no mandatory third-party dependencies, but there is a
+`no_std`-compatible, though [`alloc`](https://doc.rust-lang.org/alloc/) is
+still required. There is no mandatory third-party dependencies, but there is a
 first-party dependency on [`maplike`](https://github.com/mikwielgus/maplike), a
-library also developed by this library's authors. MSRV is 1.92.
+crate also developed by this library's authors. MSRV is 1.92.
 
 ## Usage
 
@@ -60,13 +62,17 @@ multi_bimap = "0.7.0"
 
 ### Examples
 
+Following are examples of `multi_bimap` usage. You can also find them in the
+[examples/](https://github.com/mikwielgus/multi_bimap/tree/develop/examples)
+directory.
+
 #### Many-to-many bidirectional map
 
-In academic publishing, the relation between authors and academic papers
-is many-to-many; it is a bipartite graph. Each author may have many papers,
-and each paper may have many authors. A `MultiBimap` (here under alias
+In academic publishing, the relation between authors and academic papers is
+many-to-many; it is a bipartite graph. Each author may have many papers, and
+each paper may have many authors. A `MultiBimap` (here under alias
 [`HashMultiBimap`](https://docs.rs/multi_bimap/latest/multi_bimap/type.HashMultiBimap.html)
-to shorten generic arguments) can fully represent that:
+for brevity) can fully represent that:
 
 ```rust
 use multi_bimap::HashMultiBimap;
@@ -143,9 +149,15 @@ fn main() {
 
 #### One-to-one bidirectional map
 
-A country and its capital form a one-to-one relation: each country has one
-capital, and each capital belongs to one country. `MultiBimap` (here under alias
-`HashBimap`) can represent that just as well without any additional logic:
+`multi_bimap` can also represent type-enforced one-to-one relations, as an
+alternative to the venerable [`bimap`](https://docs.rs/bimap/latest/bimap/)
+crate, which sadly appears unmaintained (though it has a maintained fork,
+[`bidimap`](https://docs.rs/bidimap/latest/bidimap/)).
+
+An example of a one-to-one-relation is a country and its capital: each country
+has one capital, and each capital belongs to one country. `MultiBimap` (here
+under alias `HashBimap`) can represent that just as well without any additional
+logic:
 
 ```rust
 use maplike::one::One;
@@ -188,6 +200,68 @@ fn main() {
     );
 
     assert_eq!(capitals.get_by_left("Lithuania"), Some(&One::new("Vilnius")));
+}
+```
+
+#### Avoiding costly cloning with `Rc`
+
+`MultiBimap::insert()` performs a clone on both inserted keys to make it
+possible for both sides of the relation to own them. This is fine for cheap
+keys, such as Rust primitive number types like `i64`, or references like `&str`,
+but for owned strings or large values this can get expensive. If the latter is
+the case, to avoid costly cloning, you can just wrap keys in `Rc` (or `Arc` if
+you need thread safety).
+
+This is also what the `bimap`/`bidimap` crate does internally.
+
+```rust
+use multi_bimap::HashMultiBimap;
+use std::collections::HashSet;
+use std::rc::Rc;
+
+fn main() {
+    // Polish medieval and Renaissance scientists and the fields they worked in.
+    // This is a many-to-many relation: some scientists worked in multiple
+    // fields, and some fields were worked on by multiple scientists.
+    let mut fields: HashMultiBimap<Rc<str>, Rc<str>> = HashMultiBimap::new();
+
+    let vitello = Rc::from("Vitello");
+    let krol = Rc::from("Marcin Król of Żurawica");
+    let brudzewski = Rc::from("Albert Brudzewski");
+    let copernicus = Rc::from("Nicolaus Copernicus");
+    let sedziwoj = Rc::from("Michał Sędziwój");
+
+    let optics = Rc::from("optics");
+    let astronomy = Rc::from("astronomy");
+    let mathematics = Rc::from("mathematics");
+    let alchemy = Rc::from("alchemy");
+
+    fields.insert(Rc::clone(&vitello), Rc::clone(&optics));
+
+    // Brudzewski and Król were both astronomers and mathematicians.
+    fields.insert(Rc::clone(&krol), Rc::clone(&astronomy));
+    fields.insert(Rc::clone(&krol), Rc::clone(&mathematics));
+    fields.insert(Rc::clone(&brudzewski), Rc::clone(&astronomy));
+    fields.insert(Rc::clone(&brudzewski), Rc::clone(&mathematics));
+
+    fields.insert(Rc::clone(&copernicus), Rc::clone(&astronomy));
+    fields.insert(Rc::clone(&sedziwoj), Rc::clone(&alchemy));
+
+    assert_eq!(
+        fields.get_by_left("Albert Brudzewski"),
+        Some(&HashSet::from([
+            Rc::clone(&astronomy),
+            Rc::clone(&mathematics),
+        ])),
+    );
+    assert_eq!(
+        fields.get_by_right("astronomy"),
+        Some(&HashSet::from([
+            Rc::clone(&krol),
+            Rc::clone(&brudzewski),
+            Rc::clone(&copernicus),
+        ])),
+    );
 }
 ```
 
