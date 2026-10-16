@@ -215,6 +215,7 @@ you need thread safety).
 This is also what the `bimap`/`bidimap` crate does internally.
 
 ```rust
+
 use multi_bimap::HashMultiBimap;
 use std::collections::HashSet;
 use std::rc::Rc;
@@ -236,15 +237,20 @@ fn main() {
     let mathematics = Rc::from("mathematics");
     let alchemy = Rc::from("alchemy");
 
+    // Vitello was both an optician and mathematician.
     fields.insert(Rc::clone(&vitello), Rc::clone(&optics));
+    fields.insert(Rc::clone(&vitello), Rc::clone(&mathematics));
 
-    // Brudzewski and Król were both astronomers and mathematicians.
+    // Król, Brudzewski, and Copernicus were both astronomers and
+    // mathematicians.
     fields.insert(Rc::clone(&krol), Rc::clone(&astronomy));
     fields.insert(Rc::clone(&krol), Rc::clone(&mathematics));
     fields.insert(Rc::clone(&brudzewski), Rc::clone(&astronomy));
     fields.insert(Rc::clone(&brudzewski), Rc::clone(&mathematics));
-
     fields.insert(Rc::clone(&copernicus), Rc::clone(&astronomy));
+    fields.insert(Rc::clone(&copernicus), Rc::clone(&mathematics));
+
+    // Sędziwój was an alchemist.
     fields.insert(Rc::clone(&sedziwoj), Rc::clone(&alchemy));
 
     assert_eq!(
