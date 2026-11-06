@@ -75,7 +75,7 @@ each paper may have many authors. A `MultiBimap` (here under alias
 for brevity) can fully represent that:
 
 ```rust
-use multi_bimap::HashMultiBimap;
+use multi_bimap::aliases::HashMultiBimap;
 use std::collections::HashSet;
 
 fn main() {
@@ -161,7 +161,7 @@ logic:
 
 ```rust
 use maplike::one::One;
-use multi_bimap::HashBimap;
+use multi_bimap::aliases::HashBimap;
 
 fn main() {
     let mut capitals: HashBimap<&str, &str> = HashBimap::new();
@@ -216,7 +216,7 @@ This is also what the `bimap`/`bidimap` crate does internally.
 
 ```rust
 
-use multi_bimap::HashMultiBimap;
+use multi_bimap::aliases::HashMultiBimap;
 use std::collections::HashSet;
 use std::rc::Rc;
 
@@ -290,9 +290,9 @@ We welcome issues, pull requests and any other contributions from anyone to our
 
 ### Outbound licence
 
-`multi_bimap` is dual-licensed as under
+`multi_bimap` is dual-licensed as under either of
 
-- [MIT license](./LICENSES/MIT.txt), or
+- [MIT license](./LICENSES/MIT.txt),
 - [Apache License, Version 2.0](./LICENSES/Apache-2.0.txt),
 
 at your option.

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use multi_bimap::HashMultiBimap;
+use multi_bimap::aliases::HashMultiBimap;
 use std::collections::HashSet;
 
 fn main() {

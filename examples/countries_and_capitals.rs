@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use maplike::one::One;
-use multi_bimap::HashBimap;
+use multi_bimap::aliases::HashBimap;
 
 fn main() {
     let mut capitals: HashBimap<&str, &str> = HashBimap::new();
